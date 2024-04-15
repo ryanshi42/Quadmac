@@ -1,3 +1,6 @@
+# Quadmac
+This is a Zetamac clone but for factorising quadratic equations. Currently there is no backend state. It is coded for personal use only, and for me, a way to experiment with SolidJS (it is really good!).
+
 ## Usage
 
 Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.
@@ -39,3 +42,4 @@ Your app is ready to be deployed!
 ## Deployment
 
 You can deploy the `dist` folder to any static host provider (netlify, surge, now, etc.)
+
