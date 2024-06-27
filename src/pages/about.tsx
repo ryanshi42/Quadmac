@@ -5,9 +5,9 @@ import type { AboutDataType } from './about.data';
 export default function About() {
   const name = useRouteData<AboutDataType>();
 
-  createEffect(() => {
-    console.log(name());
-  });
+  // createEffect(() => {
+  //   console.log(name());
+  // });
 
   return (
     <section class="bg-pink-100 text-gray-700 p-8">

@@ -6,6 +6,18 @@ import { Switch, Match } from "solid-js"
 import Timer from "./timer";
 import katex from 'katex';
 
+// Define a type for your lists of numbers (arrays of numbers)
+type NumberList = number[];
+
+class ObjectSet<NumberList> extends Set<NumberList> {
+  add(elem){
+    return super.add(typeof elem === 'object' ? JSON.stringify(elem) : elem);
+  }
+  has(elem){
+    return super.has(typeof elem === 'object' ? JSON.stringify(elem) : elem);
+  }
+}
+
 export default function Game(props) {
 
   let { is_monic, duration, lrange, rrange } = props;
@@ -13,13 +25,13 @@ export default function Game(props) {
   const [score, setScore] = createSignal(0);
   const [left, setLeft] = createSignal("");
   const [nonMonicLeft, setNonMonicLeft] = createSignal("1");
-  const [right, setRight] = createSignal("1");
-  const [nonMonicRight, setNonMonicRight] = createSignal("");
+
+  const [right, setRight] = createSignal("");
+  const [nonMonicRight, setNonMonicRight] = createSignal("1");
   const [poly, setPoly] = createSignal('\\LaTeX');
   const [timerExpired, setTimerExpired] = createSignal(false);
 
-  let leftAnswer = "";
-  let rightAnswer = "";
+  let poly_answers = new ObjectSet();
 
   let timerInterval: number;
 
@@ -50,7 +62,7 @@ export default function Game(props) {
       lrange = temp;
     }
 
-    [leftAnswer, rightAnswer] = generatePolynomial();
+    poly_answers = generatePolynomial();
 
     let math_input_html = document.getElementsByClassName("math-input");
     for (let i = 0; i < math_input_html.length; i++) {
@@ -65,7 +77,56 @@ export default function Game(props) {
     startTimer();
   });
 
-  const generatePolynomial = function(): [string, string] {
+  const gcd = function(a, b) {
+    if (a < 0 && b < 0) {
+      a *= -1;
+      b *= -1;
+    }
+    if (!b) {
+      return a;
+    }
+  
+    return gcd(b, a % b);
+  }
+
+  const generateAnswers = function(nml: number, l: number, nmr: number, r: number) : ObjectSet<NumberList> {
+    // console.log(newLeft, newRight);
+    // be careful of negative numbers!
+
+    let answers: ObjectSet<NumberList> = new ObjectSet();
+
+    // f for factors
+    let lf = [];
+    let rf = [];
+
+    // b for base
+    let nmlb = nml / gcd(nml, l);
+    let lb = l / gcd(nml, l);
+
+    let nmrb = nmr / gcd(nmr, r);
+    let rb = r / gcd(nmr, r);
+
+    let n = gcd(nml, l) * gcd(nmr, r);
+
+    // console.log("bob", nmlb, lb, nmrb, rb, n);
+    for (let i = -Math.floor(n / 2); i <= Math.ceil(n / 2); i++) {
+      if (n % i === 0) {
+        lf.push(i);
+        rf.push(n / i);
+      }
+    }
+    for (let i = 0; i < lf.length; i++) {
+      answers.add([nmlb * lf[i], lb * lf[i], nmrb * rf[i], rb * rf[i]]);
+      answers.add([nmrb * rf[i], rb * rf[i], nmlb * lf[i], lb * lf[i]]);
+      answers.add([-nmlb * lf[i], -lb * lf[i], -nmrb * rf[i], -rb * rf[i]]);
+      answers.add([-nmrb * rf[i], -rb * rf[i], -nmlb * lf[i], -lb * lf[i]]);
+      // console.log(nmlb * lf[i], lb * lf[i], nmrb * rf[i], rb * rf[i]);
+    }
+
+    return answers;
+  }
+
+  const generatePolynomial = function(): ObjectSet<NumberList> {
     let newLeft = 0;
     let newNonMonicLeft = 1;
     let hasNonMonicRolled = false;
@@ -95,7 +156,7 @@ export default function Game(props) {
       }; 
     }
 
-    console.log(newNonMonicLeft, newNonMonicRight);
+    // console.log(newNonMonicLeft, newNonMonicRight);
 
     let first = "x^2 ";
     if (newNonMonicLeft * newNonMonicRight !== 1) {
@@ -127,43 +188,52 @@ export default function Game(props) {
     setPoly(first + second + third);
     katex.render(poly(), document.getElementById("math"));
 
-    // console.log(newLeft, newRight);
-    let leftStr = String(newLeft);
-    let rightStr = String(newRight);
-    if (newLeft > 0) {
-      leftStr = "+" + leftStr;
-    }
-    if (newRight > 0) {
-      rightStr = "+" + rightStr;
-    }
-    return [leftStr, rightStr];
+    return generateAnswers(newNonMonicLeft, newLeft, newNonMonicRight, newRight);
   };
 
   const leftHandler = function(e) {
     setLeft(e.target.value);
-    checkAnswer(nonMonicLeft() + left(), nonMonicRight() + right());
+    checkAnswer(nonMonicLeft(), left(), nonMonicRight(), right());
   };
 
   const nonMonicLeftHandler = function(e) {
     setNonMonicLeft(e.target.value);
-    checkAnswer(nonMonicLeft() + left(), nonMonicRight() + right());
+    checkAnswer(nonMonicLeft(), left(), nonMonicRight(), right());
   };
 
   const rightHandler = function(e) {
     setRight(e.target.value);
-    checkAnswer(nonMonicLeft() + left(), nonMonicRight() + right());
+    checkAnswer(nonMonicLeft(), left(), nonMonicRight(), right());
   };
 
   const nonMonicRightHandler = function(e) {
     setNonMonicRight(e.target.value);
-    checkAnswer(nonMonicLeft() + left(), nonMonicRight() + right());
+    checkAnswer(nonMonicLeft(), left(), nonMonicRight(), right());
   };
 
-  const checkAnswer = (l: string, r: string) => {
+  const checkAnswer = (nml: string, l: string, nmr: string, r: string) => {
     // Have to have pairs like (2, 2)(4, 4) or (1, 1)(8, 8) or (8, 8)(1, 1)
-    if ((l == leftAnswer && r == rightAnswer) || (r == leftAnswer && l == rightAnswer)) {
-      [leftAnswer, rightAnswer] = generatePolynomial();
+
+    // p = parsed
+    let nmlp = Number(nml);
+    if (nml == "-") {
+      nmlp = -1;
+    }
+    let nmrp = Number(nmr);
+    if (nml == "-") {
+      nmlp = -1;
+    }
+    let lp = Number(l);
+    let rp = Number(r);
+
+    // console.log("smiley", nmlp, lp, nmrp, rp, poly_answers.has([nmlp, lp, nmrp, rp]));
+    if (nmlp && nmrp && lp && rp && poly_answers.has([nmlp, lp, nmrp, rp])) {
+      poly_answers = generatePolynomial();
       setScore(score() + 1);
+      if (!is_monic) {
+        (document.getElementById("nonMonicLeftSource") as HTMLInputElement).value = "";
+        (document.getElementById("nonMonicRightSource") as HTMLInputElement).value = "";
+      }
       (document.getElementById("leftSource") as HTMLInputElement).value = "";
       (document.getElementById("rightSource") as HTMLInputElement).value = "";
 
@@ -198,7 +268,7 @@ export default function Game(props) {
             <Switch>
               <Match when={!is_monic}>
                 <input 
-                  style="margin: 5px; width: 15px"
+                  style="margin: 5px; width: 30px"
                   oninput={nonMonicLeftHandler}
                   id="nonMonicLeftSource"
                 /> 
@@ -216,7 +286,7 @@ export default function Game(props) {
               <Switch>
               <Match when={!is_monic}>
                 <input 
-                  style="margin: 5px; width: 15px"
+                  style="margin: 5px; width: 30px"
                   oninput={nonMonicRightHandler}
                   id="nonMonicRightSource"
                 /> 
