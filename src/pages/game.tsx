@@ -3,7 +3,7 @@ import { createSignal } from 'solid-js';
 import { useParams } from "@solidjs/router";
 import { onMount } from "solid-js";
 import { Switch, Match } from "solid-js"
-import Timer from "./timer";
+import Timer from "./games/timer";
 import katex from 'katex';
 
 // Define a type for your lists of numbers (arrays of numbers)
@@ -31,9 +31,17 @@ const gcd = function(a, b) {
   return gcd(b, a % b);
 }
 
-export default function Game(props) {
+export default function Game() {
 
-  let { is_monic, duration, lrange, rrange } = props;
+  // let { is_monic, duration, lrange, rrange } = props;
+  let is_monic = JSON.parse(localStorage.getItem('monic_checkbox'));
+  is_monic = is_monic === null ? true : is_monic;
+  let duration = JSON.parse(localStorage.getItem('duration'));
+  duration = duration === null? 60 : duration;
+  let lrange = JSON.parse(localStorage.getItem('lrange'));
+  lrange = lrange === null? -10 : lrange;
+  let rrange = JSON.parse(localStorage.getItem('rrange'));
+  rrange = rrange === null? 10 : rrange;
 
   const [score, setScore] = createSignal(0);
   const [left, setLeft] = createSignal("");
@@ -139,7 +147,7 @@ export default function Game(props) {
   const generatePolynomial = function(): ObjectSet<NumberList> {
     const N_ROLLS = 10;
     let newLeft = 0;
-    let newNonMonicLeft = 1;
+    let newNonMonicLeft = 0;
     let rolls = 0;
   
     while (newLeft === 0 && rolls < N_ROLLS) {
@@ -161,6 +169,7 @@ export default function Game(props) {
         rolls++;
       }; 
     }
+    console.log(rolls, newLeft, newNonMonicLeft,  rrange, lrange);
     if (newNonMonicLeft === 0) {
       if (rrange === 0) {
         newNonMonicLeft = -1;
@@ -171,12 +180,11 @@ export default function Game(props) {
     rolls = 0;
 
     let newRight = 0;
-    let newNonMonicRight = 1;
+    let newNonMonicRight = 0;
     while (newRight === 0 && rolls < N_ROLLS) {
       newRight = Math.floor(Math.random() * (rrange - lrange)) + lrange;
       rolls++;
     }
-    // console.log(rolls, newRight, rrange, lrange);
     if (newRight === 0) {
       if (rrange === 0) {
         newRight = -1;
@@ -275,8 +283,10 @@ export default function Game(props) {
       if (!is_monic) {
         (document.getElementById("nonMonicLeftSource") as HTMLInputElement).value = "";
         (document.getElementById("nonMonicRightSource") as HTMLInputElement).value = "";
-        setNonMonicLeft("0");
-        setNonMonicRight("0");
+
+        // because we often read it this way...
+        setNonMonicLeft("1");
+        setNonMonicRight("1");
       }
       (document.getElementById("leftSource") as HTMLInputElement).value = "";
       (document.getElementById("rightSource") as HTMLInputElement).value = "";

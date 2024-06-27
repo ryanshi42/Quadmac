@@ -9,10 +9,10 @@ export const routes: RouteDefinition[] = [
     path: '/',
     component: Home,
   },
-  {
-    path: '/game/:id',
-    component: lazy(() => import('./pages/games/game')),
-  },
+  // {
+  //   path: '/game/:id',
+  //   component: lazy(() => import('./pages/game')),
+  // },
   {
     path: '/about',
     component: lazy(() => import('./pages/about')),
@@ -21,6 +21,10 @@ export const routes: RouteDefinition[] = [
   {
     path: '/rules',
     component: lazy(() => import('./pages/rules')),
+  },
+  {
+    path: '/game',
+    component: lazy(() => import('./pages/game')),
   },
   {
     path: '**',
