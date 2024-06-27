@@ -13,11 +13,7 @@ export default function Rules() {
         <h1 class="text-2xl font-bold">Rules</h1>
 
         <p class="mt-4">You must type the minus or plus symbol, e.g. if you wish to type (x - 1) then you must type "-1". Do not write the x.</p>
-
-        <p class="mt-4">
-            Press Ctrl-R (or Cmd-R) to restart.
-        </p>
-
+        
         <p class="mt-4">
             Use tab and shift-tab to quickly go forward and backward respectively between boxes.
         </p>
