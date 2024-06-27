@@ -31,9 +31,17 @@ const gcd = function(a, b) {
   return gcd(b, a % b);
 }
 
-export default function Game(props) {
+export default function Game() {
 
-  let { is_monic, duration, lrange, rrange } = props;
+  // let { is_monic, duration, lrange, rrange } = props;
+  let is_monic = JSON.parse(localStorage.getItem('monic_checkbox'));
+  is_monic = is_monic === null ? true : is_monic;
+  let duration = JSON.parse(localStorage.getItem('duration'));
+  duration = duration === null? 60 : duration;
+  let lrange = JSON.parse(localStorage.getItem('lrange'));
+  lrange = lrange === null? -10 : lrange;
+  let rrange = JSON.parse(localStorage.getItem('rrange'));
+  rrange = rrange === null? 10 : rrange;
 
   const [score, setScore] = createSignal(0);
   const [left, setLeft] = createSignal("");

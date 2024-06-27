@@ -31,12 +31,21 @@ export default function Home() {
     var val = JSON.parse(localStorage.getItem('rrange'));
     return val;
   }
+
+  function save_duration(duration){
+    localStorage.setItem('duration', duration);
+  }
+
+  function load_duration() : number {    
+    var val = JSON.parse(localStorage.getItem('duration'));
+    return val;
+  }
   
-  const [monic, setMonic] = createSignal(load_checkbox());
-  const [duration, setDuration] = createSignal(60);
+  const [monic, setMonic] = createSignal(load_checkbox() === null ? true : load_checkbox());
+  const [duration, setDuration] = createSignal(load_duration() === null ? 60 : load_duration());
   // const [ingame, setIngame] = createSignal(false);
-  const [left, setLeft] = createSignal(load_left());
-  const [right, setRight] = createSignal(load_right());
+  const [left, setLeft] = createSignal(load_left() === null ? -10 : load_left());
+  const [right, setRight] = createSignal(load_right() === null ? 10 : load_right());
   const [disabled, setDisabled] = createSignal(left() === right());
   // console.log(load_checkbox(), load_left(), load_right());
 
@@ -47,6 +56,7 @@ export default function Home() {
 
   const handleChangeDuration = (e) => {
     setDuration(parseInt((e.target as HTMLInputElement).value, 10));
+    save_duration(duration());
   };
 
   const handleChangeLeft = (e) => {
@@ -126,12 +136,14 @@ export default function Home() {
       
       <Switch>
         <Match when={!disabled()}>
-          <button
-            class="border rounded-lg px-2 border-gray-900"
-            style="margin-top: 10px;"
-          >
-          Start
-          </button>
+          <a href="/game">
+            <button
+              class="border rounded-lg px-2 border-gray-900"
+              style="margin-top: 10px;"
+            >
+            Start
+            </button>
+          </a>
         </Match>
         <Match when={disabled()}>
           <button
