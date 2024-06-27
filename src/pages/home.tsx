@@ -32,7 +32,6 @@ export default function Home() {
     return val;
   }
   
-  
   const [monic, setMonic] = createSignal(load_checkbox());
   const [duration, setDuration] = createSignal(60);
   const [ingame, setIngame] = createSignal(false);
