@@ -1,7 +1,7 @@
 import { createSignal } from 'solid-js';
 import { Link, useRoutes, useLocation } from '@solidjs/router';
 import { Switch, Match } from "solid-js"
-import Game from "./games/game"
+import Game from "./game"
 
 export default function Home() {
 
@@ -34,9 +34,10 @@ export default function Home() {
   
   const [monic, setMonic] = createSignal(load_checkbox());
   const [duration, setDuration] = createSignal(60);
-  const [ingame, setIngame] = createSignal(false);
+  // const [ingame, setIngame] = createSignal(false);
   const [left, setLeft] = createSignal(load_left());
   const [right, setRight] = createSignal(load_right());
+  const [disabled, setDisabled] = createSignal(left() === right());
   // console.log(load_checkbox(), load_left(), load_right());
 
   const handleChange = () => {
@@ -51,12 +52,32 @@ export default function Home() {
   const handleChangeLeft = (e) => {
     setLeft(parseInt((e.target as HTMLInputElement).value, 10));
     save_left(left());
+    if (left() >= right()) {
+      setDisabled(true);
+    } else {
+      setDisabled(false);
+    }
   };
 
   const handleChangeRight = (e) => {
     setRight(parseInt((e.target as HTMLInputElement).value, 10));
     save_right(right());
+    if (left() >= right()) {
+      setDisabled(true);
+    } else {
+      setDisabled(false);
+    }
   };
+
+  // const startGame = () => {
+  //   <a href="/game" />
+  //   <Game 
+  //     is_monic={monic()} 
+  //     duration={duration()} 
+  //     lrange={left()} 
+  //     rrange={right()} 
+  //   />
+  // }
 
   // console.log(ingame);
 
@@ -66,70 +87,67 @@ export default function Home() {
 
       {/* <p class="mt-4">Customise your settings here:</p> */}
 
+
+      {/* <h2 class="text-xl font-bold">Settings</h2> */}
+
+      <label>
+      Monic Polynomial?
+      <input
+        id="monic_checkbox"
+        type="checkbox"
+        style="margin: 10px;"
+        checked={monic()}
+        onChange={handleChange}
+      />
+      </label>
+
+      <br/>
+
+      <label>
+        Duration?
+        <select style="margin: 10px;" id="duration" onchange={handleChangeDuration}>
+          <option value="30">30 Seconds</option>
+          <option value="60" selected>60 Seconds</option>
+          <option value="120">120 Seconds</option>
+        </select>
+      </label>
+
+      <br/>
+
+      <label>
+        Ranges of values?
+        From 
+        <input type="number" value={left()} style="margin: 5px; width: 40px" id="lrange" onchange={handleChangeLeft}> </input> 
+        to
+        <input type="number" value={right()} style="margin: 5px; width: 40px" id="rrange" onchange={handleChangeRight}> </input> 
+      </label>  
+
+      <br/>
+      
       <Switch>
-        <Match when={!ingame()}>
-
-          {/* <h2 class="text-xl font-bold">Settings</h2> */}
-
-          <label>
-          Monic Polynomial?
-          <input
-            id="monic_checkbox"
-            type="checkbox"
-            style="margin: 10px;"
-            checked={monic()}
-            onChange={handleChange}
-          />
-          </label>
-
-          <br/>
-
-          <label>
-            Duration?
-            <select style="margin: 10px;" id="duration" onchange={handleChangeDuration}>
-              <option value="30">30 Seconds</option>
-              <option value="60" selected>60 Seconds</option>
-              <option value="120">120 Seconds</option>
-            </select>
-          </label>
-
-          <br/>
-
-          <label>
-            Ranges of values?
-            From 
-            <input type="number" value={load_left() !== null ? load_left() : -10} style="margin: 5px; width: 40px" id="lrange" onchange={handleChangeLeft}> </input> 
-            to
-            <input type="number" value={load_right() !== null ? load_right() : 10} style="margin: 5px; width: 40px" id="rrange" onchange={handleChangeRight}> </input> 
-          </label>  
-
-          <br/>
-          
+        <Match when={!disabled()}>
           <button
-              class="border rounded-lg px-2 border-gray-900"
-              style="margin-top: 10px"
-              onClick={() => {
-                if (left() >= right()) {
-                  alert("Left must be less than right!")
-                } else {
-                  setIngame(true)
-                }
-              }}
-            >
-            Start
+            class="border rounded-lg px-2 border-gray-900"
+            style="margin-top: 10px;"
+          >
+          Start
           </button>
-          
         </Match>
-        <Match when={ingame()}>
-          <Game 
-            is_monic={monic()} 
-            duration={duration()} 
-            lrange={left()} 
-            rrange={right()} 
-          />
+        <Match when={disabled()}>
+          <button
+            class="border rounded-lg px-2 border-gray-900"
+            style="margin-top: 10px; border: 1px solid #999999;
+              background-color: #cccccc;
+              color: #666666;
+            "
+            disabled={true}
+          >
+          Start
+          </button>
         </Match>
-
       </Switch>
+
+
       
 
 

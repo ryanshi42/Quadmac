@@ -3,7 +3,7 @@ import { createSignal } from 'solid-js';
 import { useParams } from "@solidjs/router";
 import { onMount } from "solid-js";
 import { Switch, Match } from "solid-js"
-import Timer from "./timer";
+import Timer from "./games/timer";
 import katex from 'katex';
 
 // Define a type for your lists of numbers (arrays of numbers)
