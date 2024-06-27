@@ -1,5 +1,6 @@
 import type { Component } from 'solid-js';
 import { Link, useRoutes, useLocation } from '@solidjs/router';
+import 'katex/dist/katex.min.css';
 
 import { routes } from './routes';
 

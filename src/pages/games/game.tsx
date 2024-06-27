@@ -1,10 +1,10 @@
-import { Component, createEffect, Suspense } from 'solid-js';
-import { useRouteData } from '@solidjs/router';
+import { createEffect } from 'solid-js';
 import { createSignal } from 'solid-js';
 import { useParams } from "@solidjs/router";
 import { onMount } from "solid-js";
 import { Switch, Match } from "solid-js"
 import Timer from "./timer";
+import katex from 'katex';
 
 export default function Game(props) {
 
@@ -13,7 +13,7 @@ export default function Game(props) {
   const [score, setScore] = createSignal(0);
   const [left, setLeft] = createSignal("");
   const [right, setRight] = createSignal("");
-  const [poly, setPoly] = createSignal("");
+  const [poly, setPoly] = createSignal('\\LaTeX');
   const [timerExpired, setTimerExpired] = createSignal(false);
 
   let leftAnswer = "";
@@ -50,6 +50,12 @@ export default function Game(props) {
 
     [leftAnswer, rightAnswer] = generatePolynomial();
 
+    let math_input_html = document.getElementsByClassName("math-input");
+    for (let i = 0; i < math_input_html.length; i++) {
+      katex.render(math_input_html[i].innerHTML, math_input_html[i]); 
+    }
+
+
     document.getElementById("leftSource").focus();
     startTimer();
   });
@@ -80,7 +86,10 @@ export default function Game(props) {
         third = "+ " + String(Math.abs(newLeft * newRight));
       }
     }
+
+    // KaTeX worked like a charm <3
     setPoly(first + second + third);
+    katex.render(poly(), document.getElementById("math"));
     // console.log(newLeft, newRight);
     let leftStr = String(newLeft);
     let rightStr = String(newRight);
@@ -120,31 +129,31 @@ export default function Game(props) {
     <section class="bg-gray-100 text-gray-700 p-8">
       <Switch>
         <Match when={timerExpired()}>
-          <div>Your score is: {score()}</div>
+          <div><b>Your score is: </b>{score()}</div>
         </Match>
         <Match when={!timerExpired()}>
           <div>
-            Timer: <Timer seconds={timerSeconds} />
-            Score: <div>{score()}</div>
+            <b>Timer:</b> <Timer seconds={timerSeconds} />
+            <b>Score:</b> <div>{score()}</div>
           </div>
 
           <br/>
-          Factorise this polynomial: {poly()}
+          <b>Factorise this polynomial: </b><div id="math">{poly()}</div>
           <br/>
 
           <div>
-            ( x<input 
+            <span class="math-input">( x</span><input 
               style="margin: 5px; width: 30px"
               oninput={leftHandler}
               id="leftSource"
               > 
-            </input> )
-            ( x<input 
+            </input> <span class="math_input">)</span>
+            <span class="math-input">( x</span><input 
               style="margin: 5px; width: 30px"
               oninput={rightHandler}
               id="rightSource"
               >
-            </input> )
+            </input> <span class="math_input">)</span>
           </div>
         </Match>
       </Switch>
