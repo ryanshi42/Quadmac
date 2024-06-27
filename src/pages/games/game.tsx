@@ -9,6 +9,7 @@ import katex from 'katex';
 // Define a type for your lists of numbers (arrays of numbers)
 type NumberList = number[];
 
+// ObjectSet capable of comparing lists accurately
 class ObjectSet<NumberList> extends Set<NumberList> {
   add(elem){
     return super.add(typeof elem === 'object' ? JSON.stringify(elem) : elem);
@@ -16,6 +17,18 @@ class ObjectSet<NumberList> extends Set<NumberList> {
   has(elem){
     return super.has(typeof elem === 'object' ? JSON.stringify(elem) : elem);
   }
+}
+
+const gcd = function(a, b) {
+  if (a < 0 && b < 0) {
+    a *= -1;
+    b *= -1;
+  }
+  if (!b) {
+    return a;
+  }
+
+  return gcd(b, a % b);
 }
 
 export default function Game(props) {
@@ -31,11 +44,15 @@ export default function Game(props) {
   const [poly, setPoly] = createSignal('\\LaTeX');
   const [timerExpired, setTimerExpired] = createSignal(false);
 
+
   let poly_answers = new ObjectSet();
+
 
   let timerInterval: number;
 
+
   const [timerSeconds, setTimerSeconds] = createSignal(duration);
+
 
   const startTimer = () => {
     timerInterval = setInterval(() => {
@@ -43,9 +60,11 @@ export default function Game(props) {
     }, 1000);
   };
 
+
   const stopTimer = () => {
     clearInterval(timerInterval);
   };
+
 
   createEffect(() => {
     if (timerSeconds() <= 0) {
@@ -54,9 +73,10 @@ export default function Game(props) {
     }
   });
 
+
   onMount(() => {
 
-    if (lrange < rrange) {
+    if (lrange > rrange) {
       let temp = rrange;
       rrange = lrange;
       lrange = temp;
@@ -77,18 +97,8 @@ export default function Game(props) {
     startTimer();
   });
 
-  const gcd = function(a, b) {
-    if (a < 0 && b < 0) {
-      a *= -1;
-      b *= -1;
-    }
-    if (!b) {
-      return a;
-    }
-  
-    return gcd(b, a % b);
-  }
 
+  // Generation
   const generateAnswers = function(nml: number, l: number, nmr: number, r: number) : ObjectSet<NumberList> {
     // console.log(newLeft, newRight);
     // be careful of negative numbers!
@@ -127,36 +137,68 @@ export default function Game(props) {
   }
 
   const generatePolynomial = function(): ObjectSet<NumberList> {
+    const N_ROLLS = 10;
     let newLeft = 0;
     let newNonMonicLeft = 1;
-    let hasNonMonicRolled = false;
-    while (newLeft === 0) {
+    let rolls = 0;
+  
+    while (newLeft === 0 && rolls < N_ROLLS) {
       newLeft = Math.floor(Math.random() * (rrange - lrange)) + lrange;
+      rolls++;
     };
+    if (newLeft === 0) {
+      if (rrange === 0) {
+        newLeft = -1;
+      } else {
+        newLeft = 1;
+      }
+    }
+    rolls = 0;
 
     if (!is_monic) {
-      while (newNonMonicLeft === 0 || hasNonMonicRolled === false) {
+      while (newNonMonicLeft === 0 && rolls < N_ROLLS) {
         newNonMonicLeft = Math.floor(Math.random() * (rrange - lrange)) + lrange;
-        hasNonMonicRolled = true;
+        rolls++;
       }; 
     }
-
-    hasNonMonicRolled = false;
+    if (newNonMonicLeft === 0) {
+      if (rrange === 0) {
+        newNonMonicLeft = -1;
+      } else {
+        newNonMonicLeft = 1;
+      }
+    }
+    rolls = 0;
 
     let newRight = 0;
     let newNonMonicRight = 1;
-    while (newRight === 0) {
+    while (newRight === 0 && rolls < N_ROLLS) {
       newRight = Math.floor(Math.random() * (rrange - lrange)) + lrange;
+      rolls++;
     }
+    // console.log(rolls, newRight, rrange, lrange);
+    if (newRight === 0) {
+      if (rrange === 0) {
+        newRight = -1;
+      } else {
+        newRight = 1;
+      }
+    }
+    rolls = 0;
 
     if (!is_monic) {
-      while (newNonMonicRight === 0 || hasNonMonicRolled === false) {
+      while (newNonMonicRight === 0 && rolls < N_ROLLS) {
         newNonMonicRight = Math.floor(Math.random() * (rrange - lrange)) + lrange;
-        hasNonMonicRolled = true;
+        rolls++;
       }; 
     }
-
-    // console.log(newNonMonicLeft, newNonMonicRight);
+    if (newNonMonicRight === 0) {
+      if (rrange === 0) {
+        newNonMonicRight = -1;
+      } else {
+        newNonMonicRight = 1;
+      }
+    }
 
     let first = "x^2 ";
     if (newNonMonicLeft * newNonMonicRight !== 1) {
@@ -233,9 +275,13 @@ export default function Game(props) {
       if (!is_monic) {
         (document.getElementById("nonMonicLeftSource") as HTMLInputElement).value = "";
         (document.getElementById("nonMonicRightSource") as HTMLInputElement).value = "";
+        setNonMonicLeft("0");
+        setNonMonicRight("0");
       }
       (document.getElementById("leftSource") as HTMLInputElement).value = "";
       (document.getElementById("rightSource") as HTMLInputElement).value = "";
+      setLeft("0");
+      setRight("0");
 
       // Focus on left source
       if (!is_monic) {

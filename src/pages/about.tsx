@@ -19,10 +19,6 @@ export default function About() {
         This website is built with SolidJS, TailwindCSS and Typescript. 
       </p>
 
-      <p class="mt-4">
-        If there are multiple answers, any valid answer will be accepted.
-      </p>
-
       {/* <p>
         <span>We love</span>
         <Suspense fallback={<span>...</span>}>
