@@ -1,1 +1,0 @@
-import{u as t,t as a}from"./index-tOagWer-.js";var s=a('<section class="bg-pink-100 text-gray-700 p-8"><h1 class="text-2xl font-bold">About</h1><p class=mt-4>A Zetamac clone which aims to test your ability to quickly factorise quadratics.</p><p class=mt-4>This website is built with SolidJS, TailwindCSS and Typescript. ');function e(){return t(),s()}export{e as default};
