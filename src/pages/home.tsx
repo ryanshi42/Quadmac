@@ -4,14 +4,45 @@ import { Switch, Match } from "solid-js"
 import Game from "./games/game"
 
 export default function Home() {
-  const [monic, setMonic] = createSignal(true);
+
+  function save_checkbox(monic_state){
+    localStorage.setItem('monic_checkbox', monic_state);
+  }
+
+  function load_checkbox() : boolean {    
+    var checked = JSON.parse(localStorage.getItem('monic_checkbox'));
+    return checked;
+  }
+
+  function save_left(lrange){
+    localStorage.setItem('lrange', lrange);
+  }
+
+  function load_left() : number {    
+    var val = JSON.parse(localStorage.getItem('lrange'));
+    return val;
+  }
+
+  function save_right(rrange){
+    localStorage.setItem('rrange', rrange);
+  }
+
+  function load_right() : number {    
+    var val = JSON.parse(localStorage.getItem('rrange'));
+    return val;
+  }
+  
+  
+  const [monic, setMonic] = createSignal(load_checkbox());
   const [duration, setDuration] = createSignal(60);
   const [ingame, setIngame] = createSignal(false);
-  const [left, setLeft] = createSignal(-10);
-  const [right, setRight] = createSignal(10);
+  const [left, setLeft] = createSignal(load_left());
+  const [right, setRight] = createSignal(load_right());
+  // console.log(load_checkbox(), load_left(), load_right());
 
   const handleChange = () => {
     setMonic(!monic());
+    save_checkbox(monic());
   };
 
   const handleChangeDuration = (e) => {
@@ -20,10 +51,12 @@ export default function Home() {
 
   const handleChangeLeft = (e) => {
     setLeft(parseInt((e.target as HTMLInputElement).value, 10));
+    save_left(left());
   };
 
   const handleChangeRight = (e) => {
     setRight(parseInt((e.target as HTMLInputElement).value, 10));
+    save_right(right());
   };
 
   // console.log(ingame);
@@ -31,14 +64,18 @@ export default function Home() {
   return (
     <section class="bg-gray-100 text-gray-700 p-8">
       <h1 class="text-2xl font-bold">Quadmac</h1>
+
       {/* <p class="mt-4">Customise your settings here:</p> */}
 
       <Switch>
         <Match when={!ingame()}>
 
+          {/* <h2 class="text-xl font-bold">Settings</h2> */}
+
           <label>
           Monic Polynomial?
           <input
+            id="monic_checkbox"
             type="checkbox"
             style="margin: 10px;"
             checked={monic()}
@@ -62,17 +99,27 @@ export default function Home() {
           <label>
             Ranges of values?
             From 
-            <input type="number" value="-10" style="margin: 5px; width: 40px" id="lrange" onchange={handleChangeLeft}> </input> 
+            <input type="number" value={load_left() !== null ? load_left() : -10} style="margin: 5px; width: 40px" id="lrange" onchange={handleChangeLeft}> </input> 
             to
-            <input type="number" value="10" style="margin: 5px; width: 40px" id="rrange" onchange={handleChangeRight}> </input> 
+            <input type="number" value={load_right() !== null ? load_right() : 10} style="margin: 5px; width: 40px" id="rrange" onchange={handleChangeRight}> </input> 
           </label>  
 
+          <br/>
+          
           <button
               class="border rounded-lg px-2 border-gray-900"
-              onClick={() => setIngame(true)}
+              style="margin-top: 10px"
+              onClick={() => {
+                if (left() >= right()) {
+                  alert("Left must be less than right!")
+                } else {
+                  setIngame(true)
+                }
+              }}
             >
             Start
           </button>
+          
         </Match>
         <Match when={ingame()}>
           <Game 
@@ -84,6 +131,7 @@ export default function Home() {
         </Match>
 
       </Switch>
+      
 
 
       {/* <br/>

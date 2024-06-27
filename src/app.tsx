@@ -1,5 +1,6 @@
 import type { Component } from 'solid-js';
 import { Link, useRoutes, useLocation } from '@solidjs/router';
+import 'katex/dist/katex.min.css';
 
 import { routes } from './routes';
 
@@ -19,6 +20,11 @@ const App: Component = () => {
           <li class="py-2 px-4">
             <Link href="/about" class="no-underline hover:underline">
               About
+            </Link>
+          </li>
+          <li class="py-2 px-4">
+            <Link href="/rules" class="no-underline hover:underline">
+              Rules
             </Link>
           </li>
           {/* <li class="py-2 px-4">
