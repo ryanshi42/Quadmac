@@ -3,50 +3,52 @@ import { Link, useRoutes, useLocation } from '@solidjs/router';
 import { Switch, Match } from "solid-js"
 import Game from "./game"
 
+const INFINITY = 999999999;
+
+const save_checkbox = (monic_state) => {
+  localStorage.setItem('monic_checkbox', monic_state);
+}
+
+const load_checkbox = () => {    
+  var checked = JSON.parse(localStorage.getItem('monic_checkbox'));
+  return checked;
+}
+
+const save_left = (lrange) => {
+  localStorage.setItem('lrange', lrange);
+}
+
+const load_left = () => {    
+  var val = JSON.parse(localStorage.getItem('lrange'));
+  return val;
+}
+
+const save_right = (rrange) => {
+  localStorage.setItem('rrange', rrange);
+}
+
+const load_right = () => {    
+  var val = JSON.parse(localStorage.getItem('rrange'));
+  return val;
+}
+
+const save_duration  = (duration) => {
+  localStorage.setItem('duration', duration);
+}
+
+const load_duration = () => {    
+  var val = JSON.parse(localStorage.getItem('duration'));
+  return val;
+}
+
 export default function Home() {
-
-  function save_checkbox(monic_state){
-    localStorage.setItem('monic_checkbox', monic_state);
-  }
-
-  function load_checkbox() : boolean {    
-    var checked = JSON.parse(localStorage.getItem('monic_checkbox'));
-    return checked;
-  }
-
-  function save_left(lrange){
-    localStorage.setItem('lrange', lrange);
-  }
-
-  function load_left() : number {    
-    var val = JSON.parse(localStorage.getItem('lrange'));
-    return val;
-  }
-
-  function save_right(rrange){
-    localStorage.setItem('rrange', rrange);
-  }
-
-  function load_right() : number {    
-    var val = JSON.parse(localStorage.getItem('rrange'));
-    return val;
-  }
-
-  function save_duration(duration){
-    localStorage.setItem('duration', duration);
-  }
-
-  function load_duration() : number {    
-    var val = JSON.parse(localStorage.getItem('duration'));
-    return val;
-  }
   
   const [monic, setMonic] = createSignal(load_checkbox() === null ? true : load_checkbox());
   const [duration, setDuration] = createSignal(load_duration() === null ? 60 : load_duration());
-  // const [ingame, setIngame] = createSignal(false);
   const [left, setLeft] = createSignal(load_left() === null ? -10 : load_left());
   const [right, setRight] = createSignal(load_right() === null ? 10 : load_right());
   const [disabled, setDisabled] = createSignal(left() === right());
+  // const [ingame, setIngame] = createSignal(false);
   // console.log(load_checkbox(), load_left(), load_right());
 
   const handleChange = () => {
@@ -56,6 +58,7 @@ export default function Home() {
 
   const handleChangeDuration = (e) => {
     setDuration(parseInt((e.target as HTMLInputElement).value, 10));
+    console.log(parseInt((e.target as HTMLInputElement).value, 10));
     save_duration(duration());
   };
 
@@ -96,8 +99,6 @@ export default function Home() {
       <h1 class="text-2xl font-bold">Quadmac</h1>
 
       {/* <p class="mt-4">Customise your settings here:</p> */}
-
-
       {/* <h2 class="text-xl font-bold">Settings</h2> */}
 
       <label>
@@ -115,10 +116,11 @@ export default function Home() {
 
       <label>
         Duration?
-        <select style="margin: 10px;" id="duration" onchange={handleChangeDuration}>
+        <select style="margin: 10px;" id="duration" onchange={handleChangeDuration} value={duration()}>
           <option value="30">30 Seconds</option>
           <option value="60" selected>60 Seconds</option>
           <option value="120">120 Seconds</option>
+          <option value={INFINITY}>Infinity</option>
         </select>
       </label>
 
@@ -158,10 +160,6 @@ export default function Home() {
           </button>
         </Match>
       </Switch>
-
-
-      
-
 
       {/* <br/>
       <br/>
